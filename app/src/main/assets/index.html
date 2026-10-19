@@ -31,7 +31,8 @@
             align-items: center;
         }
 
-        canvas {
+        /* حاوية اللعبة أو الكانفاس لتناسب شاشة الجوال أفقياً */
+        canvas, #gameCanvas, .game-screen {
             width: 100%;
             height: 100%;
             display: block;
@@ -166,17 +167,21 @@
 <body>
 
     <div id="game-container">
+        <!-- هنا يتم وضع كود اللعبة الأصلي (الكانفاس أو محتوى لعبتك الكامل) -->
         <canvas id="gameCanvas"></canvas>
 
+        <!-- صوت الخلفية -->
         <audio id="bgMusic" loop autoplay>
             <source src="bg_music.mp3" type="audio/mpeg">
         </audio>
 
+        <!-- القائمة العلوية (زر الخروج وحول اللعبة) -->
         <div class="top-bar">
             <button class="btn-top" onclick="exitApp()">✕ خروج</button>
             <button class="btn-top" onclick="openAbout()">ℹ حول اللعبة</button>
         </div>
 
+        <!-- أزرار التحكم باللمس الخاصة بالجوال -->
         <div class="controls-layer">
             <div class="left-controls">
                 <div class="btn btn-move" id="btnLeft">◄</div>
@@ -185,9 +190,10 @@
             <div class="btn btn-jump" id="btnJump">▲</div>
         </div>
 
+        <!-- نافذة حول اللعبة لإيقاف الصوت -->
         <div id="about-modal">
             <h3>مغامرات صفية ووليد</h3>
-            <p>لعبة مغامرات ممتعة مخصصة للجوال.</p>
+            <p>لعبة مغامرات ممتعة ومميزة.</p>
             <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleAudio()">🔊 إيقاف الصوت</button>
             <br>
             <button class="close-modal-btn" onclick="closeAbout()">إغلاق</button>
@@ -195,6 +201,7 @@
     </div>
 
     <script>
+        // إعدادات الصوت التلقائي
         const bgMusic = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('audioToggleBtn');
 
@@ -226,20 +233,24 @@
             if (window.AndroidApp && window.AndroidApp.exitGame) {
                 window.AndroidApp.exitGame();
             } else {
-                alert("إغلاق اللعبة");
+                window.history.back();
             }
         }
 
-        function bindTouch(btnId, onStart, onEnd) {
-            const btn = document.getElementById(btnId);
-            if (!btn) return;
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
-            btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
+        // محاكاة أزرار التحكم للألعاب (يمكنك ربطها بدوال اللعبة الأصلية لديك)
+        function simulateKey(keyCode, eventType) {
+            const event = new KeyboardEvent(eventType, { key: keyCode, bubbles: true });
+            window.dispatchEvent(event);
         }
 
-        bindTouch('btnLeft', () => {}, () => {});
-        bindTouch('btnRight', () => {}, () => {});
-        bindTouch('btnJump', () => {}, () => {});
+        document.getElementById('btnLeft').addEventListener('touchstart', () => simulateKey('ArrowLeft', 'keydown'));
+        document.getElementById('btnLeft').addEventListener('touchend', () => simulateKey('ArrowLeft', 'keyup'));
+        
+        document.getElementById('btnRight').addEventListener('touchstart', () => simulateKey('ArrowRight', 'keydown'));
+        document.getElementById('btnRight').addEventListener('touchend', () => simulateKey('ArrowRight', 'keyup'));
+        
+        document.getElementById('btnJump').addEventListener('touchstart', () => simulateKey('ArrowUp', 'keydown'));
+        document.getElementById('btnJump').addEventListener('touchend', () => simulateKey('ArrowUp', 'keyup'));
     </script>
 </body>
 </html>
