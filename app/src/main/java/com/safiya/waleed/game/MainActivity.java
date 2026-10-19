@@ -1,14 +1,14 @@
 package com.safiya.waleed.game;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private WebView webView;
 
@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // تفعيل وضع ملء الشاشة وإخفاء أشرطة النظام
         hideSystemUI();
 
         webView = new WebView(this);
@@ -27,8 +28,9 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setAllowFileAccess(true);
-        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setMediaPlaybackRequiresUserGesture(false); // السماح بتشغيل الصوت تلقائياً
 
+        // ربط زر الخروج من اللعبة مع أندرويد
         webView.addJavascriptInterface(new WebAppInterface(), "AndroidApp");
 
         webView.setWebViewClient(new WebViewClient());
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     public class WebAppInterface {
         @JavascriptInterface
         public void exitGame() {
-            finishAffinity();
+            finishAffinity(); // إغلاق التطبيق تماماً
         }
     }
 
