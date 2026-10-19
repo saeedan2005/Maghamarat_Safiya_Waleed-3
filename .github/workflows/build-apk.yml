@@ -1,4 +1,3 @@
-
 name: Build Android APK
 
 on:
@@ -26,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configure Android SDK
+      - name: Configure Android SDK & Accept Licenses
         shell: bash
         run: |
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
@@ -42,8 +41,17 @@ jobs:
 
           echo "Using SDK manager: $SDKMANAGER"
 
-          yes | "$SDKMANAGER" --licenses
+          # إنشاء مجلد التراخيص إذا لم يكن موجوداً، ووضع علامات قبول التراخيص لتجنب مشاكل Broken pipe
+          LICENSE_DIR="$ANDROID_HOME/licenses"
+          mkdir -p "$LICENSE_DIR"
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$LICENSE_DIR/android-sdk-license"
+          echo "d56f5187479451eabf01fb78af6dfcb131a64810" >> "$LICENSE_DIR/android-sdk-license"
+          echo "24333f8a43b682d23c5bbf81fb1d4f29a3a2a3b1" > "$LICENSE_DIR/android-sdk-preview-license"
 
+          # محاولة قبول بقية التراخيص بشكل آمن
+          yes | "$SDKMANAGER" --licenses || true
+
+          # تثبيت الحزم المطلوبة
           "$SDKMANAGER" --install \
             "platform-tools" \
             "platforms;android-35" \
@@ -61,4 +69,3 @@ jobs:
           name: Maghamarat-Safiya-Waleed-APK
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-
