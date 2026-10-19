@@ -1,4 +1,4 @@
-
+```yaml
 name: Build Android APK
 
 on:
@@ -25,7 +25,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools,platforms;android-35,build-tools;35.0.0'
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
+
+      - name: Check Android SDK
+        run: |
+          sdkmanager --list_installed
 
       - name: Build Debug APK
         run: |
@@ -37,3 +44,5 @@ jobs:
         with:
           name: Maghamarat-Safiya-Waleed-APK
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+```
