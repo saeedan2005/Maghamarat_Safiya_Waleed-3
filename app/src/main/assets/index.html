@@ -3,78 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
     <meta name="color-scheme" content="light">
     <title>مغامرات صفية والوليد — ١٠ مراحل</title>
     <style>
         @font-face{font-family:ArabicUI;src:local('Tahoma'),local('Arial')}
         *{box-sizing:border-box;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-        html, body{width:100vw;height:100vh;overflow:hidden;margin:0;font-family:ArabicUI,Tahoma,Arial,sans-serif;background:#000;color:#26324a}
+        html{direction:rtl}
+        body{margin:0;font-family:ArabicUI,Tahoma,Arial,sans-serif;background:linear-gradient(160deg,#dff7ff,#fff4d8);color:#26324a;min-height:100vh;display:flex;justify-content:center;overflow:hidden;width:100vw;height:100vh}
         
-        #game-container{position:relative;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;background:#b6efff}
+        #app{width:100vw;height:100vh;padding:0;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center}
         
-        /* ضبط الكانفاس لملء الشاشة أفقياً */
-        canvas, .game {width:100%!important;height:100%!important;object-fit:contain;display:block}
+        h1{margin:5px 0;font-size:clamp(20px,4vw,30px);text-align:center;color:#6c43a5}
+        .sub{text-align:center;margin:2px 0 8px;line-height:1.5;font-size:12px}
+        .panel{background:#ffffffed;border:2px solid #fff;border-radius:22px;padding:14px;box-shadow:0 8px 22px #53648b22}
+        .choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+        .pick{border:3px solid #e4e8f2;background:#fff;border-radius:18px;padding:10px;width:min(44%,245px);cursor:pointer;font-size:20px;font-weight:bold;color:#38425a}
+        .pick img{height:120px;max-width:100%;object-fit:contain;display:block;margin:auto}
+        .pick.selected{border-color:#8b5bd6;background:#f5edff}
+        .btn{border:0;border-radius:14px;padding:10px 16px;background:#8053c7;color:white;font-weight:bold;font-size:15px;cursor:pointer;margin:5px;box-shadow:0 3px 0 #5f399c}
+        .btn:active,.ctrl:active{transform:translateY(2px);box-shadow:none}
+        .hud{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:bold;margin-bottom:8px}
+        .hud span{background:#fff;padding:6px 10px;border-radius:12px;border:1px solid #e7e3f2}
+        
+        /* ضبط شاشة اللعبة لتناسب الجوال أفقياً وملء الشاشة */
+        .game{position:relative;overflow:hidden;border-radius:18px;border:3px solid #fff;box-shadow:0 5px 20px #45536a33;background:#b6efff;width:100vw;height:100vh;flex-grow:1}
+        canvas{display:block;width:100%!important;height:100%!important;object-fit:contain;touch-action:none}
+        
+        .stage-overlay{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#18203b99;padding:16px}
+        .stage-card{max-width:420px;width:100%;background:#fffdf8;border:3px solid #ffe28a;border-radius:24px;padding:18px;box-shadow:0 12px 40px #1118;text-align:center;animation:popin .35s ease-out}
+        .stage-card h2{margin:4px 0 8px;color:#6c43a5}
+        .stage-card p{line-height:1.8;margin:8px 0 12px}
+        .castle-preview{font-size:52px;filter:drop-shadow(0 4px 3px #0002)}
+        @keyframes popin{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+        
+        /* أزرار التحكم الجديدة المخصصة للجوال */
+        .controls{display:none;position:absolute;bottom:15px;left:0;right:0;justify-content:space-between;align-items:center;padding:0 20px;z-index:99;direction:ltr;pointer-events:none}
+        .pad{display:flex;gap:15px;pointer-events:auto}
+        .ctrl{width:60px;height:55px;border:2px solid rgba(255,255,255,0.6);border-radius:17px;background:rgba(255,255,255,0.3);color:#4f3883;font-size:24px;font-weight:bold;box-shadow:0 4px 0 #d2c6ed;touch-action:none;user-select:none;backdrop-filter:blur(2px);display:flex;justify-content:center;align-items:center}
+        .ctrl:active{background:rgba(255,255,255,0.6)}
+        .ctrl.jump-btn{width:70px;background:rgba(255,200,0,0.4);border-color:rgba(255,200,0,0.8);pointer-events:auto}
 
-        /* شريط القائمة العلوي (خروج وحول اللعبة) */
-        .top-bar{position:absolute;top:10px;left:15px;right:15px;display:flex;justify-content:space-between;z-index:999;pointer-events:auto}
+        /* شريط القائمة العلوي وزر الخروج وحول اللعبة */
+        .top-bar{position:absolute;top:10px;left:15px;right:15px;display:flex;justify-content:space-between;z-index:100;pointer-events:auto}
         .btn-top{padding:6px 14px;border-radius:20px;font-size:13px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.5);color:#fff;cursor:pointer}
 
-        /* أزرار التحكم بالجوال (شفافة وصغيرة) */
-        .controls-layer{position:absolute;bottom:15px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px;z-index:999;pointer-events:none}
-        .left-controls{display:flex;gap:15px;pointer-events:auto}
-        .ctrl-btn{width:55px;height:55px;border:2px solid rgba(255,255,255,0.6);border-radius:50%;background:rgba(255,255,255,0.25);color:white;font-size:22px;font-weight:bold;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(2px)}
-        .ctrl-btn:active{background:rgba(255,255,255,0.5)}
-        .btn-jump{width:65px;height:65px;background:rgba(255,200,0,0.35);border-color:rgba(255,200,0,0.7);pointer-events:auto}
-
-        /* نافذة حول اللعبة */
+        /* نافذة حول اللعبة والصوت */
         #about-modal {display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:350px;background:rgba(20,20,20,0.95);border:2px solid #ffd700;border-radius:12px;padding:20px;color:#fff;text-align:center;z-index:1000;pointer-events:auto}
         #about-modal h3{margin-bottom:10px;color:#ffd700}
         #about-modal p{font-size:13px;margin-bottom:15px;line-height:1.4}
         .audio-toggle-btn{background:#ff9800;border:none;padding:8px 16px;color:white;font-weight:bold;border-radius:6px;margin-bottom:15px;cursor:pointer}
         .close-modal-btn{background:#e53935;border:none;padding:6px 12px;color:white;border-radius:6px;cursor:pointer}
+
+        .hint{text-align:center;font-size:13px;color:#59647b;line-height:1.8;margin:9px 0}
+        .hidden{display:none!important}
+        .center{text-align:center}
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <!-- القائمة العلوية للخروج وحول اللعبة -->
-        <div class="top-bar">
-            <button class="btn-top" onclick="exitApp()">✕ خروج</button>
-            <button class="btn-top" onclick="openAbout()">ℹ حول اللعبة</button>
-        </div>
+    <!-- شريط الخروج وحول اللعبة العلوي -->
+    <div class="top-bar">
+        <button class="btn-top" onclick="exitApp()">✕ خروج</button>
+        <button class="btn-top" onclick="openAbout()">ℹ حول اللعبة</button>
+    </div>
 
-        <!-- صوت الخلفية -->
-        <audio id="bgMusic" loop autoplay>
-            <source src="bg_music.mp3" type="audio/mpeg">
-        </audio>
+    <!-- صوت الخلفية -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="bg_music.mp3" type="audio/mpeg">
+    </audio>
 
-        <!-- أزرار التحكم للشاشة -->
-        <div class="controls-layer">
-            <div class="left-controls">
-                <div class="ctrl-btn" id="btnLeft">◄</div>
-                <div class="ctrl-btn" id="btnRight">►</div>
+    <!-- نافذة حول اللعبة والتحكم بالصوت -->
+    <div id="about-modal">
+        <h3>مغامرات صفية والوليد</h3>
+        <p>لعبة المغامرات الشيقة والمكونة من ١٠ مراحل.</p>
+        <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleAudio()">🔊 إيقاف الصوت</button>
+        <br>
+        <button class="close-modal-btn" onclick="closeAbout()">إغلاق</button>
+    </div>
+
+    <div id="app">
+        <!-- محتوى اللعبة الأصلي بالكامل -->
+        <div class="panel" id="screen-start">
+            <h1>مغامرات صفية والوليد</h1>
+            <div class="sub">اختر البطل وابدأ رحلة الـ ١٠ مراحل الممتعة!</div>
+            <div class="choices">
+                <div class="pick" onclick="selectHero('safiya')">صفية</div>
+                <div class="pick" onclick="selectHero('waleed')">وليد</div>
             </div>
-            <div class="ctrl-btn btn-jump" id="btnJump">▲</div>
-        </div>
-
-        <!-- نافذة حول اللعبة والصوت -->
-        <div id="about-modal">
-            <h3>مغامرات صفية ووليد</h3>
-            <p>لعبة المغامرات الشيقة والمصممة خصيصاً للجوال.</p>
-            <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleAudio()">🔊 إيقاف الصوت</button>
-            <br>
-            <button class="close-modal-btn" onclick="closeAbout()">إغلاق</button>
-        </div>
-
-        <!-- محتوى لعبتك الأصلي بالكامل -->
-        <div id="app" style="width:100%; height:100%;">
-            <!-- هنا سيتم تحميل محرك ولعبة صفية ووليد الأصلية -->
+            <div class="center" style="margin-top:15px;">
+                <button class="btn" onclick="startGame()">ابدأ المغامرة</button>
+            </div>
         </div>
     </div>
 
+    <!-- أزرار التحكم باللمس للشاشة الأفقي -->
+    <div class="controls" id="touchControls">
+        <div class="pad">
+            <button class="ctrl" id="btnLeft">◄</button>
+            <button class="ctrl" id="btnRight">►</button>
+        </div>
+        <button class="ctrl jump-btn" id="btnJump">▲</button>
+    </div>
+
     <script>
-        // دمج محتوى لعبتك الأصلي هنا وتفعيل الأزرار الصوتية والتحكم
+        // إعدادات الصوت التلقائي
         const bgMusic = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('audioToggleBtn');
 
@@ -110,17 +143,27 @@
             }
         }
 
-        // ربط أزرار التحكم باللمس مع محرك اللعبة
+        // إظهار أزرار التحكم عند بدء اللعب
+        function startGame() {
+            document.getElementById('touchControls').style.display = 'flex';
+            // هنا يتم استدعاء دوال اللعبة الأصلية الخاصة بك لبدء المراحل
+        }
+
+        function selectHero(hero) {
+            console.log("Selected hero:", hero);
+        }
+
+        // ربط أزرار التحكم باللمس مع المحرك
         function simulateKey(code, type) {
             window.dispatchEvent(new KeyboardEvent(type, { code: code, key: code, bubbles: true }));
         }
 
-        document.getElementById('btnLeft').addEventListener('touchstart', () => simulateKey('ArrowLeft', 'keydown'));
-        document.getElementById('btnLeft').addEventListener('touchend', () => simulateKey('ArrowLeft', 'keyup'));
-        document.getElementById('btnRight').addEventListener('touchstart', () => simulateKey('ArrowRight', 'keydown'));
-        document.getElementById('btnRight').addEventListener('touchend', () => simulateKey('ArrowRight', 'keyup'));
-        document.getElementById('btnJump').addEventListener('touchstart', () => simulateKey('ArrowUp', 'keydown'));
-        document.getElementById('btnJump').addEventListener('touchend', () => simulateKey('ArrowUp', 'keyup'));
+        document.getElementById('btnLeft').addEventListener('touchstart', (e) => { e.preventDefault(); simulateKey('ArrowLeft', 'keydown'); });
+        document.getElementById('btnLeft').addEventListener('touchend', (e) => { e.preventDefault(); simulateKey('ArrowLeft', 'keyup'); });
+        document.getElementById('btnRight').addEventListener('touchstart', (e) => { e.preventDefault(); simulateKey('ArrowRight', 'keydown'); });
+        document.getElementById('btnRight').addEventListener('touchend', (e) => { e.preventDefault(); simulateKey('ArrowRight', 'keyup'); });
+        document.getElementById('btnJump').addEventListener('touchstart', (e) => { e.preventDefault(); simulateKey('ArrowUp', 'keydown'); });
+        document.getElementById('btnJump').addEventListener('touchend', (e) => { e.preventDefault(); simulateKey('ArrowUp', 'keyup'); });
     </script>
 </body>
 </html>
