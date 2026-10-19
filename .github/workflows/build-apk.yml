@@ -41,12 +41,11 @@ jobs:
 
           echo "Using SDK manager: $SDKMANAGER"
 
-          # إنشاء مجلد التراخيص ووضع ملفات القبول لتجنب مشاكل Broken pipe
           LICENSE_DIR="$ANDROID_HOME/licenses"
           mkdir -p "$LICENSE_DIR"
           echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$LICENSE_DIR/android-sdk-license"
           echo "d56f5187479451eabf01fb78af6dfcb131a64810" >> "$LICENSE_DIR/android-sdk-license"
-          echo "24333f8a43b682d23c5bbf81fb1d4f29a3a2a3b1" > "$LICENSE_DIR/android-sdk-preview-license"
+          echo "24333f8a43b682d23c5bbf81fb1d4f29a3a2a3b1" >> "$LICENSE_DIR/android-sdk-preview-license"
 
           yes | "$SDKMANAGER" --licenses || true
 
@@ -58,7 +57,6 @@ jobs:
       - name: Generate Gradle Wrapper
         shell: bash
         run: |
-          # توليد ملفات gradlew المفقودة تلقائياً داخل المشروع
           gradle wrapper
 
       - name: Build Debug APK
